@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARAYA GAMESTATION RESERVATION</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI;}
+
+body{
+background:linear-gradient(135deg,#1a0025,#2a003f,#3a0057);
+color:white;
+padding:20px;
+min-height:100vh;
+}
+
+.container{max-width:1200px;margin:auto;}
+h1{margin-bottom:20px;font-size:22px;}
+
+.card{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:18px;
+box-shadow:0 20px 40px rgba(0,0,0,0.4);
+margin-bottom:30px;
+}
+
+.form-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:12px;
+}
+
+input,select{
+padding:12px;
+border-radius:12px;
+border:none;
+background:rgba(0,0,0,0.4);
+color:white;
+font-size:14px;
+}
+
+input:focus,select:focus{
+outline:none;
+box-shadow:0 0 0 2px #ff4ecb;
+}
+
+button{
+padding:10px 14px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:bold;
+transition:0.2s;
+position:relative;
+}
+
+.btn-save{
+background:linear-gradient(135deg,#6a00ff,#ff008c);
+color:white;
+width:100%;
+margin-top:10px;
+}
+
+.btn-edit{background:#4f46e5;color:white;}
+.btn-delete{background:#e11d48;color:white;}
+
+.booking-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:15px;
+}
+
+.booking-card{
+background:rgba(255,255,255,0.05);
+padding:15px;
+border-radius:16px;
+border:1px solid rgba(255,255,255,0.1);
+animation:fadeIn 0.4s ease;
+}
+
+.booking-info{
+font-size:13px;
+margin-top:6px;
+opacity:0.9;
+}
+
+.action-buttons{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+/* ===== TOAST ===== */
+
+.toast{
+position:fixed;
+top:20px;
+right:20px;
+min-width:260px;
+padding:14px 18px;
+border-radius:14px;
+color:white;
+font-size:14px;
+box-shadow:0 15px 30px rgba(0,0,0,0.4);
+animation:slideIn 0.4s ease;
+z-index:999;
+}
+
+.toast.success{background:linear-gradient(135deg,#00c853,#009624);}
+.toast.error{background:linear-gradient(135deg,#ff1744,#b2102f);}
+.toast.info{background:linear-gradient(135deg,#6a00ff,#ff008c);}
+
+/* ===== BUTTON LOADING ===== */
+
+.btn-loading{
+opacity:0.7;
+pointer-events:none;
+}
+
+.btn-loading::after{
+content:"";
+width:14px;
+height:14px;
+border:2px solid rgba(255,255,255,0.3);
+border-top:2px solid white;
+border-radius:50%;
+position:absolute;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+animation:spin 0.6s linear infinite;
+}
+
+@keyframes spin{
+to{transform:translateY(-50%) rotate(360deg);}
+}
+
+@keyframes slideIn{
+from{transform:translateX(120%);}
+to{transform:translateX(0);}
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(10px);}
+to{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>🎮 ARAYA GAMESTATION RESERVATION</h1>
+
+<div class="card">
+<div class="form-grid">
+<input id="nama" placeholder="Nama">
+<input id="wa" placeholder="WhatsApp">
+<select id="lokasi">
+<option value="GAMBUT">GAMBUT</option>
+<option value="BERUNTUNG">BERUNTUNG</option>
+</select>
+<select id="room">
+<option value="VIP1">VIP 1</option>
+<option value="VIP2">VIP 2</option>
+<option value="PREMIER1">PREMIER 1</option>
+<option value="PREMIER2">PREMIER 2</option>
+</select>
+<input type="date" id="tanggal">
+<input type="time" id="jamMulai">
+<input type="number" id="durasi" placeholder="Durasi Jam">
+<input id="dp" placeholder="DP" oninput="formatDP(this)">
+</div>
+
+<button class="btn-save" onclick="saveBooking()">SIMPAN</button>
+</div>
+
+<h1>📋 List Bookingan</h1>
+<div class="booking-grid" id="listBooking"></div>
+
+</div>
+
+<script>
+
+const API_URL="https://script.google.com/macros/s/AKfycby7rCzSR5gv9ikR6K17umUJ1JSTBHIRn-3IrOq0mnVPHdyda4BRe_erwBxIz6rBzr9l/exec";
+let editRowIndex=null;
+
+/* ===== TOAST ===== */
+
+function showToast(message,type="info"){
+const toast=document.createElement("div");
+toast.className="toast "+type;
+toast.innerText=message;
+document.body.appendChild(toast);
+setTimeout(()=>toast.remove(),3000);
+}
+
+/* ===== BUTTON LOADING CONTROL ===== */
+
+function setButtonLoading(button,text){
+button.classList.add("btn-loading");
+button.dataset.originalText=button.innerText;
+button.innerText=text;
+}
+
+function resetButton(button){
+button.classList.remove("btn-loading");
+button.innerText=button.dataset.originalText;
+}
+
+/* ===== UTIL ===== */
+
+function formatDP(input){
+let value=input.value.replace(/\D/g,"");
+if(!value){input.value="";return;}
+input.value=new Intl.NumberFormat("id-ID").format(value);
+}
+
+function timeToMinutes(timeStr){
+let [h,m]=timeStr.split(":").map(Number);
+return h*60+m;
+}
+
+function hitungJamSelesai(jamMulai,durasi){
+let [h,m]=jamMulai.split(":").map(Number);
+h+=parseInt(durasi);
+if(h>=24)h-=24;
+return (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
+}
+
+/* ===== API ===== */
+
+async function getBookings(){
+let res=await fetch(API_URL+"?action=getBookings");
+return await res.json();
+}
+
+function resetForm(){
+document.getElementById("nama").value="";
+document.getElementById("wa").value="";
+document.getElementById("tanggal").value="";
+document.getElementById("jamMulai").value="";
+document.getElementById("durasi").value="";
+document.getElementById("dp").value="";
+editRowIndex=null;
+document.querySelector(".btn-save").innerText="SIMPAN";
+}
+
+/* ===== SAVE ===== */
+
+async function saveBooking(){
+
+let btn=document.querySelector(".btn-save");
+
+let nama=document.getElementById("nama").value;
+let wa=document.getElementById("wa").value;
+let lokasi=document.getElementById("lokasi").value;
+let room=document.getElementById("room").value;
+let tanggal=document.getElementById("tanggal").value;
+let jamMulai=document.getElementById("jamMulai").value;
+let durasi=document.getElementById("durasi").value;
+let dp=document.getElementById("dp").value.replace(/\./g,"");
+
+if(!nama||!tanggal||!jamMulai||!durasi){
+showToast("Lengkapi datanya dulu guys","error");
+return;
+}
+
+setButtonLoading(btn, editRowIndex===null ? "Menyimpan..." : "Mengupdate...");
+
+let jamSelesai=hitungJamSelesai(jamMulai,durasi);
+let allBookings=await getBookings();
+let newStart=timeToMinutes(jamMulai);
+let newEnd=timeToMinutes(jamSelesai);
+
+for(let i=0;i<allBookings.length;i++){
+let b=allBookings[i];
+if(b[2]===lokasi && b[3]===room && b[4]===tanggal){
+let existingStart=timeToMinutes(b[5]);
+let existingEnd=timeToMinutes(b[6]);
+if(newStart < existingEnd && newEnd > existingStart){
+resetButton(btn);
+showToast("Bentrok dengan "+b[0]+" ("+b[5]+" - "+b[6]+")","error");
+return;
+}
+}
+}
+
+if(editRowIndex===null){
+
+await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:new URLSearchParams({
+action:"addBooking",
+Nama:nama,
+WhatsApp:wa,
+Lokasi:lokasi,
+Room:room,
+Tanggal:tanggal,
+JamMulai:jamMulai,
+JamSelesai:jamSelesai,
+DurasiJam:durasi,
+DP:dp,
+Status:"BOOKED"
+})
+});
+
+showToast("Bookingan berhasil disimpan","success");
+
+}else{
+
+await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:new URLSearchParams({
+action:"editBooking",
+rowIndex:editRowIndex,
+Tanggal:tanggal,
+JamMulai:jamMulai,
+JamSelesai:jamSelesai,
+DurasiJam:durasi
+})
+});
+
+showToast("Bookingan berhasil diperbarui","success");
+}
+
+resetForm();
+await loadTable();
+resetButton(btn);
+}
+
+/* ===== DELETE ===== */
+
+async function hapus(rowIndex){
+if(!confirm("Yakin hapus bookingan ini?"))return;
+
+let btn=event.target;
+setButtonLoading(btn,"Menghapus...");
+
+await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:new URLSearchParams({
+action:"deleteBooking",
+rowIndex:rowIndex
+})
+});
+
+showToast("Bookingan berhasil dihapus","success");
+await loadTable();
+resetButton(btn);
+}
+
+/* ===== LOAD ===== */
+
+async function loadTable(){
+let data=await getBookings();
+let html="";
+for(let i=0;i<data.length;i++){
+let rowIndex=i+2;
+html+=`
+<div class="booking-card">
+<h3>${data[i][0]} - ${data[i][3]}</h3>
+<div class="booking-info">
+📍 ${data[i][2]}<br>
+📅 ${data[i][4]}<br>
+⏰ ${data[i][5]} - ${data[i][6]}<br>
+💰 DP: ${new Intl.NumberFormat("id-ID").format(data[i][8])}
+</div>
+<div class="action-buttons">
+<button class="btn-edit" onclick='isiFormUntukEdit(${rowIndex},${JSON.stringify(data[i])})'>Edit</button>
+<button class="btn-delete" onclick="hapus(${rowIndex})">Hapus</button>
+</div>
+</div>`;
+}
+document.getElementById("listBooking").innerHTML=html;
+}
+
+function isiFormUntukEdit(rowIndex,data){
+document.getElementById("nama").value=data[0];
+document.getElementById("wa").value=data[1];
+document.getElementById("lokasi").value=data[2];
+document.getElementById("room").value=data[3];
+document.getElementById("tanggal").value=data[4];
+document.getElementById("jamMulai").value=data[5];
+document.getElementById("durasi").value=data[7];
+document.getElementById("dp").value=new Intl.NumberFormat("id-ID").format(data[8]);
+editRowIndex=rowIndex;
+document.querySelector(".btn-save").innerText="UPDATE";
+showToast("Mode edit aktif","info");
+}
+
+loadTable();
+
+</script>
+</body>
+</html>
