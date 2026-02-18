@@ -160,10 +160,12 @@ to{opacity:1;transform:translateY(0);}
 <input id="nama" placeholder="Nama">
 <input id="wa" placeholder="WhatsApp">
 <select id="lokasi">
+<option value="">--Pilih Lokasi--</option>
 <option value="GAMBUT">GAMBUT</option>
 <option value="BERUNTUNG">BERUNTUNG</option>
 </select>
 <select id="room">
+<option value="">--Pilih Room--</option>
 <option value="VIP1">VIP 1</option>
 <option value="VIP2">VIP 2</option>
 <option value="PREMIER1">PREMIER 1</option>
@@ -171,7 +173,7 @@ to{opacity:1;transform:translateY(0);}
 </select>
 <input type="date" id="tanggal">
 <input type="time" id="jamMulai">
-<input type="number" id="durasi" placeholder="Durasi Jam">
+<input type="number" id="durasi" placeholder="Durasi (Jam)">
 <input id="dp" placeholder="DP" oninput="formatDP(this)">
 </div>
 
@@ -195,7 +197,7 @@ const toast=document.createElement("div");
 toast.className="toast "+type;
 toast.innerText=message;
 document.body.appendChild(toast);
-setTimeout(()=>toast.remove(),3000);
+setTimeout(()=>toast.remove(),5000);
 }
 
 /* ===== BUTTON LOADING CONTROL ===== */
@@ -309,7 +311,7 @@ Status:"BOOKED"
 })
 });
 
-showToast("Bookingan berhasil disimpan","success");
+showToast("Bookingan disimpan","success");
 
 }else{
 
@@ -326,7 +328,7 @@ DurasiJam:durasi
 })
 });
 
-showToast("Bookingan berhasil diperbarui","success");
+showToast("Bookingan diperbarui","success");
 }
 
 resetForm();
@@ -351,7 +353,7 @@ rowIndex:rowIndex
 })
 });
 
-showToast("Bookingan berhasil dihapus","success");
+showToast("Bookingan dihapus","success");
 await loadTable();
 resetButton(btn);
 }
@@ -367,10 +369,17 @@ html+=`
 <div class="booking-card">
 <h3>${data[i][0]} - ${data[i][3]}</h3>
 <div class="booking-info">
-📍 ${data[i][2]}<br>
-📅 ${data[i][4]}<br>
-⏰ ${data[i][5]} - ${data[i][6]}<br>
-💰 DP: ${new Intl.NumberFormat("id-ID").format(data[i][8])}
+📌 ${data[i][2]}<br>
+🗓️ ${
+  new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date(data[i][4]))
+}<br>
+⌚ ${data[i][5]} - ${data[i][6]} WITA<br>
+💳 Rp ${new Intl.NumberFormat("id-ID").format(data[i][8])}
 </div>
 <div class="action-buttons">
 <button class="btn-edit" onclick='isiFormUntukEdit(${rowIndex},${JSON.stringify(data[i])})'>Edit</button>
