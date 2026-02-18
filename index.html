@@ -16,7 +16,7 @@ min-height:100vh;
 }
 
 .container{max-width:1200px;margin:auto;}
-h1{margin-bottom:20px;font-size:22px;}
+h1{margin-bottom:20px;font-size:22px;text-align:center;}
 
 .card{
 background:rgba(255,255,255,0.05);
@@ -153,7 +153,7 @@ to{opacity:1;transform:translateY(0);}
 <body>
 <div class="container">
 
-<h1>🎮 ARAYA GAMESTATION RESERVATION</h1>
+<h1>ARAYA GAMESTATION RESERVATION</h1>
 
 <div class="card">
 <div class="form-grid">
@@ -180,7 +180,7 @@ to{opacity:1;transform:translateY(0);}
 <button class="btn-save" onclick="saveBooking()">SIMPAN</button>
 </div>
 
-<h1>📋 List Bookingan</h1>
+<h1>List Bookingan</h1>
 <div class="booking-grid" id="listBooking"></div>
 
 </div>
@@ -243,6 +243,8 @@ return await res.json();
 function resetForm(){
 document.getElementById("nama").value="";
 document.getElementById("wa").value="";
+document.getElementById("lokasi").value="";
+document.getElementById("room").value="";
 document.getElementById("tanggal").value="";
 document.getElementById("jamMulai").value="";
 document.getElementById("durasi").value="";
@@ -279,6 +281,10 @@ let newStart=timeToMinutes(jamMulai);
 let newEnd=timeToMinutes(jamSelesai);
 
 for(let i=0;i<allBookings.length;i++){
+let currentRowIndex = i + 2;
+if(editRowIndex !== null && currentRowIndex === editRowIndex){
+continue;
+}
 let b=allBookings[i];
 if(b[2]===lokasi && b[3]===room && b[4]===tanggal){
 let existingStart=timeToMinutes(b[5]);
@@ -331,9 +337,9 @@ DurasiJam:durasi
 showToast("Bookingan diperbarui","success");
 }
 
+resetButton(btn);
 resetForm();
 await loadTable();
-resetButton(btn);
 }
 
 /* ===== DELETE ===== */
