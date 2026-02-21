@@ -27,6 +27,18 @@ box-shadow:0 20px 40px rgba(0,0,0,0.4);
 margin-bottom:30px;
 }
 
+.form-group{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.form-group label{
+font-size:12px;
+opacity:0.7;
+margin-left:4px;
+}
+
 .form-grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
@@ -157,28 +169,67 @@ to{opacity:1;transform:translateY(0);}
 
 <div class="card">
 <div class="form-grid">
-<input id="nama" placeholder="Nama">
-<input id="wa" placeholder="WhatsApp">
+<div class="form-group">
+<label>Nama</label>
+<input id="nama" placeholder="Input Nama">
+</div>
+
+<div class="form-group">
+<label>WhatsApp</label>
+<input id="wa" placeholder="Contoh: 08**********">
+</div>
+
+<div class="form-group">
+<label>Lokasi</label>
 <select id="lokasi">
 <option value="">--Pilih Lokasi--</option>
 <option value="GAMBUT">GAMBUT</option>
 <option value="BERUNTUNG">BERUNTUNG</option>
 </select>
-<select id="room">
-<option value="">--Pilih Room--</option>
-<option value="VIP1">VIP 1</option>
-<option value="VIP2">VIP 2</option>
-<option value="PREMIER1">PREMIER 1</option>
-<option value="PREMIER2">PREMIER 2</option>
-</select>
-<input type="number" id="mic" placeholder="Nambah Mic">
-<input type="number" id="orang" placeholder="Nambah Orang">
-<input type="date" id="tanggal" placeholder="Tanggal Mulai">
-<input type="time" id="jamMulai" placeholder="Jam Mulai">
-<input type="number" id="durasi" placeholder="Durasi (Jam)">
-<input id="dp" placeholder="DP Min 50%" oninput="formatDP(this)">
 </div>
 
+<div class="form-group">
+<label>Room</label>
+<select id="room">
+<option value="">--Pilih Room--</option>
+<option value="VIP 1">VIP 1</option>
+<option value="VIP 2">VIP 2</option>
+<option value="PREMIER 1">PREMIER 1</option>
+<option value="PREMIER 2">PREMIER 2</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Tambah Mic</label>
+<input type="number" id="mic" placeholder="Contoh: 1">
+</div>
+
+<div class="form-group">
+<label>Tambah Orang</label>
+<input type="number" id="orang" placeholder="Contoh: 1">
+</div>
+
+<div class="form-group">
+<label>Tanggal</label>
+<input type="date" id="tanggal">
+</div>
+
+<div class="form-group">
+<label>Jam Mulai</label>
+<input type="time" id="jamMulai">
+</div>
+
+<div class="form-group">
+<label>Durasi (Jam)</label>
+<input type="number" id="durasi" placeholder="Contoh: 1">
+</div>
+
+<div class="form-group">
+<label>DP (Min 50%)</label>
+<input id="dp" oninput="formatDP(this)" placeholder="Contoh: 25.000">
+</div>
+
+</div>
 <button class="btn-save" onclick="saveBooking()">SIMPAN</button>
 </div>
 
